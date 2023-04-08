@@ -19,18 +19,20 @@ LETTER = 0
 DIGIT = 1
 UNKNOWN = 99
 
-#Token codes
-INT_LIT = 10
-IDENT = 11
-ASSIGN_OP = 20
-ADD_OP = 21
-SUB_OP = 22
-MULT_OP = 23
-DIV_OP = 24
-LEFT_PAREN = 25
-RIGHT_PAREN = 26
-EQUALS = 27
-SEMICOL = 28
+#Token codes dictionary to map token codes to their names
+TOKEN_CODES = {
+    'INT_LIT': 10,
+    'IDENT': 11,
+    'ASSIGN_OP': 20,
+    'ADD_OP': 21,
+    'SUB_OP': 22,
+    'MULT_OP': 23,
+    'DIV_OP': 24,
+    'LEFT_PAREN': 25,
+    'RIGHT_PAREN': 26,
+    'EQUALS': 27,
+    'SEMICOL': 28
+}
 
 
 # Add a char to the current lexeme
@@ -77,35 +79,35 @@ def lookup(char):
 
     if (char == '('):
         addChar()
-        nextToken = LEFT_PAREN
+        nextToken = 'LEFT_PAREN'
 
     elif (char == ')'):
         addChar()
-        nextToken = RIGHT_PAREN
+        nextToken = 'RIGHT_PAREN'
 
     elif (char == '+'):
         addChar()
-        nextToken = ADD_OP
+        nextToken = 'ADD_OP'
 
     elif (char == '-'):
         addChar()
-        nextToken = SUB_OP
+        nextToken = 'SUB_OP'
 
     elif (char == '*'):
         addChar()
-        nextToken = MULT_OP
+        nextToken = 'MULT_OP'
 
     elif (char == '/'):
         addChar()
-        nextToken = DIV_OP
+        nextToken = 'DIV_OP'
 
     elif (char == '='):
         addChar()
-        nextToken = EQUALS
+        nextToken = 'EQUALS'
 
     elif (char == ';'):
         addChar()
-        nextToken = SEMICOL
+        nextToken = 'SEMICOL'
 
     else:
         addChar()
@@ -119,19 +121,23 @@ def lex():
     # Parse over the blank spaces
     getNonBlank()
 
-    # Identify the character class
-    # Add the char to the lexeme
-    # Get the next char
+    # If the char class is LETTER
     if (charClass == LETTER):
+        # Add the char to the lexeme
         addChar()
+        # Get the next char
         getChar()
 
+        # While the char class is LETTER or DIGIT
         while (charClass == LETTER or charClass == DIGIT):
+            # Add the char to the lexeme
             addChar()
+            # Get the next char
             getChar()
 
-        nextToken = IDENT
+        nextToken = 'IDENT'
     
+    # If the char class is DIGIT
     elif (charClass == DIGIT):
         addChar()
         getChar()
@@ -140,10 +146,13 @@ def lex():
             addChar()
             getChar()
 
-        nextToken = INT_LIT
+        nextToken = 'INT_LIT'
 
+    # If the char class is UNKNOWN
     elif (charClass == UNKNOWN):
+        # Lookup the char
         lookup(nextChar)
+        # Get the next char
         getChar()
 
     # If charClass is EOF, the while loop in main will terminate after printing the last token and lexeme
@@ -152,7 +161,10 @@ def lex():
         lexeme = 'EOF'
 
     # Print the token and lexeme
-    print(f"Next token is: {nextToken}, Next lexeme is {lexeme}\n")
+    if (nextToken == '-1'):
+        print("End of file\n")
+    else:
+        print(f"Next token is: {nextToken}({TOKEN_CODES[nextToken]}), Next lexeme is {lexeme}\n")
 
     # Reset the lexeme
     lexeme = ''
@@ -160,13 +172,22 @@ def lex():
 
 # main driver
 if __name__ == '__main__':
-    # Open the input data file and process its contents
-    # r = read
-    with open('FrontIn1.txt', 'r') as in_fp:
-        # getChar on the first char in the file
-        getChar()
-        # Just a new line for readability of output
-        print('\n')
-        # Perform lexical analysis on the rest of the file
-        while nextToken != '-1':
-            lex()
+    # Prompt the user for an input file
+    filename = input("\nEnter the input file name: ")
+    # Handle errors opening the file
+    try:
+        # Open the input data file and process its contents
+        # r = read
+        with open(filename, 'r') as in_fp:
+            # getChar on the first char in the file
+            getChar()
+            # Just a new line for readability of output
+            print('\n')
+            # Perform lexical analysis on the rest of the file
+            while nextToken != '-1':
+                lex()
+    except FileNotFoundError:
+        print("Error: file not found")
+    except Exception as e:
+        print("Error:", e)
+
